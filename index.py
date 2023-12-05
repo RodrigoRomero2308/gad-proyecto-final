@@ -1,11 +1,24 @@
-import librosa
+import os
+import pandas
 
-y, sr = librosa.load("495179971-Cassin's Finch.mp3")
+from finalcode.embeddings import embed_audio
 
-tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr)
 
-print('Estimated tempo: {:.2f} beats per minute'.format(tempo))
+folder = 'C:\\Users\\rodri\\OneDrive\\Documentos\\Facultad\\GAD\\Code\\audios\\parecidos'
 
-beat_times = librosa.frames_to_time(beat_frames, sr=sr)
+files_in_folder = os.listdir(folder)
 
-print(beat_times)
+document_data = []
+
+for file in files_in_folder:
+  if not file.endswith('.wav'):
+    continue
+
+  embeddings = embed_audio(os.path.join(folder, file))
+
+  document_data.append({
+    "filename": file,
+    "embeddings": embeddings,
+  })
+
+  
