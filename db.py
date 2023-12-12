@@ -5,9 +5,7 @@ from embeddings import embed_audio
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
 from typing import Union
-from models.bird_song import BirdSong
-
-from models.species import Species
+from models import BirdSong, Species
 
 load_dotenv()
 
@@ -47,6 +45,7 @@ def save_to_db(filepath: str, species_common_name: Union[str, None], species_sci
     print(species)
   # Guardamos en la base
 
+  # FIXME: file_embeddings es de tipo ndarray, da error: psycopg2.ProgrammingError: can't adapt type 'numpy.ndarray'
   new_bird_song = BirdSong(filename=filename, vector=file_embeddings)
 
   session.add(new_bird_song)
