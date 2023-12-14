@@ -45,8 +45,7 @@ def save_to_db(filepath: str, species_common_name: Union[str, None], species_sci
     print(species)
   # Guardamos en la base
 
-  # FIXME: file_embeddings es de tipo ndarray, da error: psycopg2.ProgrammingError: can't adapt type 'numpy.ndarray'
-  new_bird_song = BirdSong(filename=filename, vector=file_embeddings)
+  new_bird_song = BirdSong(filename=filename, vector=file_embeddings.tolist(), species_id=species.id)
 
   session.add(new_bird_song)
   session.commit()
