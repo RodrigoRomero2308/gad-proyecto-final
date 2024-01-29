@@ -2,8 +2,11 @@
 
 - Crear el algoritmo para calcular el indice FHQT+ (no incluye el vector representativo, siempre lo vamos a calcular por python) (Rebe)
 - Base de datos: funcion de busqueda, parametro: vector caracteristico, radio. salida: ids y distancia de los mas parecidos (maximo 10) (Luisi)
-- Hacer una funcion que reciba como parametro un path (de un archivo de audio), obtenga el vector representativo (con el otro archivo) y busque en la base de datos los audios "mas cercanos" (ver parametros) (RR)
-- Postgres: seleccion de pivotes por seleccion incremental (capaz que no)
+  - Lucas: Terminando el calcular vector
+  - Rebe: Cambia la funcion busquedaFHQT para que devuelva un id (del dato de la tabla bird_song) y la distancia.
+  - Luisi: Cambia las funciones promedio distancia maxima y seleccionar pivotes incremental.
+  - RR: Revisa el PANN
+- Hacer una funcion que reciba como parametro un path (de un archivo de audio), obtenga el vector representativo (con el otro archivo) y busque en la base de datos los audios "mas cercanos" (ver parametros) (RR) (blocked)
 - Definir lote de 50 consultas, resultado esperado, % de aciertos a la primera y en 5 lugares
 
 ## Innecesarios
