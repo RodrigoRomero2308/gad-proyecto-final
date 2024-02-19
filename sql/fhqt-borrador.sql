@@ -220,7 +220,7 @@ BEGIN
 
 	--Por cada nivel (cant de pivotes)
 	FOR i IN 1..nivel LOOP
-		select id into parent_ids from tree where level = (i - 1);
+		select array_agg(id) into parent_ids from tree where level = (i - 1);
 		--Por la cantidad de rangos
 		FOR j IN 1..cantidad_rangos LOOP
 			--Si es el primer nivel no lleva parent_id
@@ -250,6 +250,68 @@ BEGIN
 	end loop;
 END;
 $insertar_rangos_entre_pivotes$
+language plpgsql;
+
+CREATE OR REPLACE function "recargar_arbol_item"(neww bird_song%rowtype) RETURNS void AS
+$recargar_arbol_item$
+DECLARE
+	pivot_vector NUMERIC[];
+	distance_from_pivot int;
+	parent_id_last_pivot int;
+	tree_item tree%rowtype;
+	bird_song_id_to_insert int;
+	levels int;
+BEGIN
+	select max(level) into levels from pivot group by level limit 1;
+	FOR i IN 1..levels LOOP
+		if i=levels then
+			bird_song_id_to_insert = neww.id;
+		end if;
+		
+		select vector into pivot_vector from pivot where pivot."level" = i;
+		
+		raise notice 'iteracion % pivote %', i, pivot_vector;
+		
+		distance_from_pivot := euclidean_distance(neww.vector, pivot_vector);
+		
+		raise notice 'distancia del pivote %', distance_from_pivot;
+		
+		if parent_id_last_pivot is null then
+			select * into tree_item from tree t 
+			where t.parent_id is null and (distance_from_pivot between t.lower_distance and t.upper_distance
+			or distance_from_pivot > t.lower_distance and t.upper_distance is null);
+		else
+			select * into tree_item from tree t 
+			where t.parent_id = parent_id_last_pivot and (distance_from_pivot between t.lower_distance and t.upper_distance
+			or distance_from_pivot > t.lower_distance and t.upper_distance is null);
+		end if;
+		
+		if i < levels then
+			parent_id_last_pivot:= tree_item.id;
+			raise notice 'nuevo parent_id %', parent_id_last_pivot;
+		else
+			INSERT INTO tree (parent_id, vector_id, lower_distance)
+				VALUES
+					(parent_id_last_pivot, bird_song_id_to_insert, distance_from_pivot);
+			
+			raise notice 'Inserto nodo hoja';
+		end if;
+	raise notice 'vector %, iteracion %, parent %', neww.vector, i, parent_id_last_pivot;
+	END LOOP;
+END;
+$recargar_arbol_item$
+language plpgsql;
+
+CREATE OR REPLACE function "recargar_arbol"() RETURNS void AS
+$recargar_arbol_item$
+DECLARE
+	song bird_song%rowtype;
+BEGIN
+	foreach song in (select * from bird_song) loop
+		recargar_arbol_item(song);
+	end loop;
+END;
+$recargar_arbol_item$
 language plpgsql;
 
 --select insertar_rangos_entre_pivotes();
