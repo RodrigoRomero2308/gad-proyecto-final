@@ -185,12 +185,12 @@ END;
 $busquedaFHQT$
 language plpgsql;
 
-CREATE OR REPLACE function "promedio_distancias_maximas"(pivotes numeric[][], pares numeric[][][]) RETURNS int as
+CREATE OR REPLACE function "promedio_distancias_maximas"(pivotes numeric[][], pares numeric[][][]) RETURNS numeric as
 $$
 declare
-	total int;
-	distmax int;
-	newdist int;
+	total numeric;
+	distmax numeric;
+	newdist numeric;
 	par numeric[][];
 	pivote numeric[];
 begin
@@ -220,22 +220,22 @@ DECLARE
 	paresaux numeric[][][];
 	pivotes numeric[][];
 	candidatos numeric[][];
-	actualresultado int;
-	mejorresultado int;
+	actualresultado numeric;
+	mejorresultado numeric;
 	actualpivote numeric[];
 	mejorpivote numeric[];
 begin
 	pares := '{}';
 	for i in 1..80 loop
-		par := array(select vector::numeric[] from bird_song order by random() limit 2);
+		par := array(select vector from bird_song order by random() limit 2);
 		paresaux := array[par];
 		pares := array_cat(pares, paresaux);
 	end loop;
 		
 	pivotes := '{}';
-	FOR i IN 1..7 loop
-		candidatos := array(select vector::varchar from bird_song where not vector = any(pivotes) order by random() limit 10);
-		mejorpivote := '';
+	FOR i IN 1..10 loop
+		candidatos := array(select vector from bird_song where not vector = any(pivotes) order by random() limit 10);
+		mejorpivote := '{}';
 		mejorresultado := 0;
 		for j in 1..10 loop
 			actualpivote := candidatos[j];
