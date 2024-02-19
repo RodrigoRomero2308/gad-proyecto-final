@@ -186,6 +186,8 @@ CREATE OR REPLACE FUNCTION "insertar_rangos_entre_pivotes"() RETURNS void AS
 $insertar_rangos_entre_pivotes$
 DECLARE
 	pivotes NUMERIC[][];
+	pivote NUMERIC[];
+	pivote2 NUMERIC[];
 	pivot_vector NUMERIC[];
 	highest_distance NUMERIC;
 	new_distance NUMERIC;
@@ -193,6 +195,7 @@ DECLARE
 	nivel int;
 	cantidad_rangos int;
 	parent_ids int[];
+	p_id int;
 BEGIN
 	DELETE FROM "tree";
 	DELETE FROM "pivot";
@@ -231,7 +234,7 @@ BEGIN
 						VALUES (null, i, range_increment * (j - 1), null);
 				else
 					INSERT INTO tree (parent_id, level, lower_distance, upper_distance)
-						VALUES (null, i, range_increment * (j - 1), range_increment * j)
+						VALUES (null, i, range_increment * (j - 1), range_increment * j);
 				end if;
 			--Si es otro nivel hay buscar los nodos que tengan nivel i - 1 y para cada uno insertar el rango j
 			else
@@ -242,7 +245,7 @@ BEGIN
 							VALUES (p_id, i, range_increment * (j - 1), null);
 					else
 						INSERT INTO tree (parent_id, level, lower_distance, upper_distance)
-							VALUES (p_id, i, range_increment * (j - 1), range_increment * j)
+							VALUES (p_id, i, range_increment * (j - 1), range_increment * j);
 					end if;
 				end loop;
 			end if;
