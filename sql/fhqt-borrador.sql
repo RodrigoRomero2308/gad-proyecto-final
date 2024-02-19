@@ -147,10 +147,12 @@ DECLARE
 	pivote NUMERIC[];
 	distance_from_pivot NUMERIC;
 	nodos_ultimo_nivel INT ARRAY;
+	levels int;
 BEGIN
+	select max(level) into levels from pivot group by level limit 1;
 	nodos_ultimo_nivel:='{}';
-	FOR i IN 1..10 LOOP
-		select vector into pivote from pivotes where nivel = i;
+	FOR i IN 1..levels LOOP
+		select vector into pivote from pivot where level = i;
 		
 		distance_from_pivot:=euclidean_distance(vector_buscada, pivote);
 		
@@ -161,7 +163,7 @@ BEGIN
 		-- El resultado lo guardo
 		
 		select array_agg("id") into nodos_ultimo_nivel from tree
-		where ABS(distancia - distance_from_pivot) <= radio
+		where ABS(lower_distance - distance_from_pivot) <= radio
 		AND  ((array_length(nodos_ultimo_nivel, 1) is null AND parent_id is null) 
 			 OR
 			  array_length(nodos_ultimo_nivel, 1) is not null AND parent_id = ANY(nodos_ultimo_nivel)
@@ -171,13 +173,14 @@ BEGIN
 	END LOOP;
 	
 	return query select 
+		"id",
 		vector as vector_encontrada, 
 		euclidean_distance(vector_buscada, vector) as distancia_con_vector from bird_song
 	where euclidean_distance(vector_buscada, vector) <= radio
 	AND "id" in (
-		SELECT "vector_id" from tree
+		SELECT "bird_song_id" from tree
 		where "id" = ANY(nodos_ultimo_nivel)
-	);
+	); -- revisar explain para que filtro de id se haga primero
 END;
 $busquedaFHQT$
 language plpgsql;
@@ -250,4 +253,4 @@ END;
 $$
 language plpgsql;
 
-select seleccionar_pivotes_incremental();
+--select insertar_rangos_entre_pivotes();
