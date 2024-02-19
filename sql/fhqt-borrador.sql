@@ -138,21 +138,21 @@ $insertar_rangos_entre_pivotes$
 language plpgsql;
 
 
-CREATE OR REPLACE FUNCTION busquedaFHQT(vector_buscada VARCHAR(100), radio int) returns TABLE (
-	vector_encontrada VARCHAR(100),
-	distancia_con_vector INT
+CREATE OR REPLACE FUNCTION busquedaFHQT(vector_buscada NUMERIC[], radio int) returns TABLE (
+	vector_encontrada NUMERIC[],
+	distancia_con_vector NUMERIC
 ) as
 $busquedaFHQT$
 DECLARE
-	pivote VARCHAR(100);
-	distance_from_pivot INT;
+	pivote NUMERIC[];
+	distance_from_pivot NUMERIC;
 	nodos_ultimo_nivel INT ARRAY;
 BEGIN
 	nodos_ultimo_nivel:='{}';
 	FOR i IN 1..10 LOOP
 		select vector into pivote from pivotes where nivel = i;
 		
-		distance_from_pivot:=levenshtein(vector_buscada, pivote);
+		distance_from_pivot:=euclidean_distance(vector_buscada, pivote);
 		
 		raise notice 'Distancia % con el pivote', distance_from_pivot;
 		
@@ -170,8 +170,10 @@ BEGIN
 		raise notice 'Encontrados % elementos', nodos_ultimo_nivel;
 	END LOOP;
 	
-	return query select vector as vector_encontrada, levenshtein(vector_buscada, vector) as distancia_con_vector from bird_song
-	where levenshtein(vector_buscada, vector) <= radio
+	return query select 
+		vector as vector_encontrada, 
+		euclidean_distance(vector_buscada, vector) as distancia_con_vector from bird_song
+	where euclidean_distance(vector_buscada, vector) <= radio
 	AND "id" in (
 		SELECT "vector_id" from tree
 		where "id" = ANY(nodos_ultimo_nivel)
