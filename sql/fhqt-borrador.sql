@@ -20,9 +20,11 @@ DECLARE
 	parent_id_last_pivot int;
 	tree_item tree%rowtype;
 	bird_song_id_to_insert int;
+	levels int;
 BEGIN
-	FOR i IN 1..10 LOOP
-		if i=10 then
+	select max(level) into levels from pivot group by level limit 1;
+	FOR i IN 1..levels LOOP
+		if i=levels then
 			bird_song_id_to_insert = new.id;
 		end if;
 		
@@ -36,26 +38,19 @@ BEGIN
 		
 		if parent_id_last_pivot is null then
 			select * into tree_item from tree t 
-			where t.parent_id is null and distance_from_pivot between t.lower_distance and t.upper_distance;
+			where t.parent_id is null and (distance_from_pivot between t.lower_distance and t.upper_distance
+			or distance_from_pivot > t.lower_distance and t.upper_distance is null);
 		else
 			select * into tree_item from tree t 
-			where t.parent_id = parent_id_last_pivot and distance_from_pivot between t.lower_distance and t.upper_distance;
+			where t.parent_id = parent_id_last_pivot and (distance_from_pivot between t.lower_distance and t.upper_distance
+			or distance_from_pivot > t.lower_distance and t.upper_distance is null);
 		end if;
 		
-		if i < 10 then
-			if tree_item.id is not null then
-				parent_id_last_pivot:= tree_item.id;
-				raise notice 'nuevo parent_id %', parent_id_last_pivot;
-			else
-				INSERT INTO tree (parent_id, vector_id, distancia)
-				VALUES
-					(parent_id_last_pivot, bird_song_id_to_insert, distance_from_pivot)
-				returning id into parent_id_last_pivot;
-				
-				raise notice 'nuevo parent_id post insert %', parent_id_last_pivot;
-			end if;
+		if i < levels then
+			parent_id_last_pivot:= tree_item.id;
+			raise notice 'nuevo parent_id %', parent_id_last_pivot;
 		else
-			INSERT INTO tree (parent_id, vector_id, distancia)
+			INSERT INTO tree (parent_id, vector_id, lower_distance)
 				VALUES
 					(parent_id_last_pivot, bird_song_id_to_insert, distance_from_pivot);
 			
@@ -72,22 +67,92 @@ language plpgsql;
 CREATE OR REPLACE TRIGGER "calcular_arbol_vector" AFTER INSERT /* OR UPDATE OR DELETE */ ON bird_song for each row
 execute procedure "calcular_arbol_vector"();
 
+CREATE OR REPLACE FUNCTION "insertar_rangos_entre_pivotes"() RETURNS void AS
+$insertar_rangos_entre_pivotes$
+DECLARE
+	pivotes NUMERIC[][];
+	pivot_vector NUMERIC[];
+	highest_distance NUMERIC;
+	new_distance NUMERIC;
+	range_increment NUMERIC;
+	nivel int;
+	cantidad_rangos int;
+	parent_ids int[];
+BEGIN
+	DELETE FROM "tree";
+	DELETE FROM "pivot";
 
-CREATE OR REPLACE FUNCTION busquedaFHQT(vector_buscada VARCHAR(100), radio int) returns TABLE (
-	vector_encontrada VARCHAR(100),
-	distancia_con_vector INT
+	highest_distance := 0;
+	nivel := 0;
+	cantidad_rangos := 10;
+	pivotes := seleccionar_pivotes_incremental();
+
+	foreach pivote in array pivotes loop
+		nivel := nivel + 1;
+		INSERT INTO pivot (vector, level)
+			VALUES (pivote, nivel);
+
+		foreach pivote2 in array pivotes loop
+			new_distance := euclidean_distance(pivote, pivote2);
+			if new_distance > highest_distance then
+				highest_distance := new_distance;
+			end if;
+		end loop;
+	end loop;
+
+	new_distance := 0;
+	range_increment := highest_distance / nivel; --pasar int a numeric
+
+	--Por cada nivel (cant de pivotes)
+	FOR i IN 1..nivel LOOP
+		select id into parent_ids from tree where level = (i - 1);
+		--Por la cantidad de rangos
+		FOR j IN 1..cantidad_rangos LOOP
+			--Si es el primer nivel no lleva parent_id
+			if i == 1 then
+				--Si es el último rango no tiene upper_distance
+				if j == cantidad_rangos then
+					INSERT INTO tree (parent_id, level, lower_distance, upper_distance)
+						VALUES (null, i, range_increment * (j - 1), null);
+				else
+					INSERT INTO tree (parent_id, level, lower_distance, upper_distance)
+						VALUES (null, i, range_increment * (j - 1), range_increment * j)
+				end if;
+			--Si es otro nivel hay buscar los nodos que tengan nivel i - 1 y para cada uno insertar el rango j
+			else
+				foreach p_id in array parent_ids loop
+					--Si es el último rango no tiene upper_distance
+					if j == (nivel - 1) then
+						INSERT INTO tree (parent_id, level, lower_distance, upper_distance)
+							VALUES (p_id, i, range_increment * (j - 1), null);
+					else
+						INSERT INTO tree (parent_id, level, lower_distance, upper_distance)
+							VALUES (p_id, i, range_increment * (j - 1), range_increment * j)
+					end if;
+				end loop;
+			end if;
+		end loop;
+	end loop;
+END;
+$insertar_rangos_entre_pivotes$
+language plpgsql;
+
+
+CREATE OR REPLACE FUNCTION busquedaFHQT(vector_buscada NUMERIC[], radio int) returns TABLE (
+	vector_encontrada NUMERIC[],
+	distancia_con_vector NUMERIC
 ) as
 $busquedaFHQT$
 DECLARE
-	pivote VARCHAR(100);
-	distance_from_pivot INT;
+	pivote NUMERIC[];
+	distance_from_pivot NUMERIC;
 	nodos_ultimo_nivel INT ARRAY;
 BEGIN
 	nodos_ultimo_nivel:='{}';
 	FOR i IN 1..10 LOOP
 		select vector into pivote from pivotes where nivel = i;
 		
-		distance_from_pivot:=levenshtein(vector_buscada, pivote);
+		distance_from_pivot:=euclidean_distance(vector_buscada, pivote);
 		
 		raise notice 'Distancia % con el pivote', distance_from_pivot;
 		
@@ -105,8 +170,10 @@ BEGIN
 		raise notice 'Encontrados % elementos', nodos_ultimo_nivel;
 	END LOOP;
 	
-	return query select vector as vector_encontrada, levenshtein(vector_buscada, vector) as distancia_con_vector from bird_song
-	where levenshtein(vector_buscada, vector) <= radio
+	return query select 
+		vector as vector_encontrada, 
+		euclidean_distance(vector_buscada, vector) as distancia_con_vector from bird_song
+	where euclidean_distance(vector_buscada, vector) <= radio
 	AND "id" in (
 		SELECT "vector_id" from tree
 		where "id" = ANY(nodos_ultimo_nivel)
