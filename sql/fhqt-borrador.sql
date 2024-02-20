@@ -154,28 +154,28 @@ DECLARE
 	actualpivote numeric[];
 	mejorpivote numeric[];
 begin
-	pares := '{}';
+	pares := ARRAY[]::NUMERIC[][][];
 	for i in 1..80 loop
 		par := array(select vector from bird_song order by random() limit 2);
 		paresaux := array[par];
 		pares := array_cat(pares, paresaux);
 	end loop;
 		
-	pivotes := '{}';
+	pivotes := ARRAY[]::NUMERIC[][];
 	FOR i IN 1..10 loop
-		candidatos := array(select vector from bird_song where not vector = any(pivotes) order by random() limit 10);
-		mejorpivote := '{}';
+		candidatos := array(select vector from bird_song order by random() limit 10);
+		mejorpivote := ARRAY[]::NUMERIC[];
 		mejorresultado := 0;
 		for j in 1..10 loop
 			actualpivote := candidatos[j];
-			actualresultado := promedio_distancias_maximas( array_append(pivotes, actualpivote), pares);
+			actualresultado := promedio_distancias_maximas( pivotes || ARRAY[actualpivote], pares);
 			--raise notice '%', actualresultado;
 			if mejorresultado < actualresultado then
 				mejorpivote := actualpivote;
 				mejorresultado := actualresultado;
 			end if;
 		end loop;
-		pivotes := array_append(pivotes, mejorpivote);
+		pivotes := pivotes || ARRAY[mejorpivote];
 	END LOOP;
 	return pivotes;
 END;
