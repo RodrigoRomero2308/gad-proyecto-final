@@ -16,7 +16,7 @@ CREATE OR REPLACE function "calcular_arbol_vector"() RETURNS TRIGGER AS
 $build_tree$
 DECLARE
 	pivot_vector NUMERIC[];
-	distance_from_pivot int;
+	distance_from_pivot numeric;
 	parent_id_last_pivot int;
 	tree_item tree%rowtype;
 	bird_song_id_to_insert int;
@@ -245,7 +245,7 @@ CREATE OR REPLACE function "recargar_arbol"() RETURNS void AS
 $recargar_arbol_item$
 DECLARE
 	pivot_vector NUMERIC[];
-	distance_from_pivot int;
+	distance_from_pivot numeric;
 	parent_id_last_pivot int;
 	tree_item tree%rowtype;
 	bird_song_id_to_insert int;
