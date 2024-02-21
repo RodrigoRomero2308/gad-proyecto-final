@@ -1,7 +1,5 @@
 # TODO
 
-- Crear el algoritmo para calcular el indice FHQT+ (no incluye el vector representativo, siempre lo vamos a calcular por python) (Rebe)
-- Hacer una funcion que reciba como parametro un path (de un archivo de audio), obtenga el vector representativo (con el otro archivo) y busque en la base de datos los audios "mas cercanos" (ver parametros) (RR) (blocked)
 - Definir lote de 50 consultas, resultado esperado, % de aciertos a la primera y en 5 lugares
 
 ## Innecesarios
@@ -16,3 +14,5 @@
 - Un archivo con una funcion que reciba como parametro un path, un nombre de archivo y una lista de numeros y los guarde en una base de datos (done)
 - Buscar repositorio de audios (con 100 alcanza como para probar) (done)
 - Base de datos: funcion de busqueda, parametro: vector caracteristico, radio. salida: ids y distancia de los mas parecidos (maximo 10)
+- Crear el algoritmo para calcular el indice FHQT+ (no incluye el vector representativo, siempre lo vamos a calcular por python)
+- Hacer una funcion que reciba como parametro un path (de un archivo de audio), obtenga el vector representativo (con el otro archivo) y busque en la base de datos los audios "mas cercanos" (ver parametros)

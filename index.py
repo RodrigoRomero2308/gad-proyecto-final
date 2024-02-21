@@ -5,5 +5,5 @@ species_common_name = "Black and white Warbler"
 species_scientific_name= "mniotilta varia"
 
 
-save_to_db(filepath, species_common_name, species_scientific_name)
+# save_to_db(filepath, species_common_name, species_scientific_name)
 # similarity_search(filepath)
