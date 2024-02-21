@@ -76,10 +76,8 @@ END;
 $build_tree$
 language plpgsql;
 
-CREATE OR REPLACE TRIGGER "calcular_arbol_vector" AFTER INSERT /* OR UPDATE OR DELETE */ ON bird_song for each row
-execute procedure "calcular_arbol_vector"();
-
-CREATE OR REPLACE FUNCTION busquedaFHQT(vector_buscada NUMERIC[], radio int) returns TABLE (
+CREATE OR REPLACE FUNCTION busquedaFHQT(vector_buscada NUMERIC[], radio NUMERIC) returns TABLE (
+	result_id int,
 	vector_encontrada NUMERIC[],
 	distancia_con_vector NUMERIC
 ) as
@@ -114,7 +112,7 @@ BEGIN
 	END LOOP;
 	
 	return query select 
-		"id",
+		"id" as result_id,
 		vector as vector_encontrada, 
 		euclidean_distance(vector_buscada, vector) as distancia_con_vector from bird_song
 	where euclidean_distance(vector_buscada, vector) <= radio
@@ -245,7 +243,7 @@ CREATE OR REPLACE function "recargar_arbol"() RETURNS void AS
 $recargar_arbol_item$
 DECLARE
 	pivot_vector NUMERIC[];
-	distance_from_pivot int;
+	distance_from_pivot NUMERIC;
 	parent_id_last_pivot int;
 	tree_item tree%rowtype;
 	bird_song_id_to_insert int;
@@ -312,3 +310,6 @@ language plpgsql;
 
 --select insertar_rangos_entre_pivotes();
 --select recargar_arbol();
+
+-- CREATE OR REPLACE TRIGGER "calcular_arbol_vector" AFTER INSERT /* OR UPDATE OR DELETE */ ON bird_song for each row
+-- execute procedure "calcular_arbol_vector"();

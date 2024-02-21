@@ -19,6 +19,7 @@ class BirdSong(Base):
 
   id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
   filename: Mapped[str] = mapped_column(String)
+  filepath: Mapped[str] = mapped_column(String)
   vector: Mapped[List[Float]] = mapped_column(ARRAY(Float))
   species_id: Mapped[int] = mapped_column(ForeignKey("species.id"))
 
