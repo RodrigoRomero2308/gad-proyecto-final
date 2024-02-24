@@ -7,6 +7,10 @@ import os
 app = Flask(__name__)
 CORS(app)
 
+@app.route("/health", methods=["GET"])
+def health():
+    return "ok"
+
 @app.route('/search_for_songs', methods=['POST'])
 def search_for_songs():
     if request.method == 'POST':
