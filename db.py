@@ -71,7 +71,8 @@ from busquedafhqt(ARRAY[{array_string}], {radius}) bf
 inner join bird_song b on b."id" = bf."result_id"
 inner join species s on b.species_id = s."id"
 where bf.distancia_con_vector > 0
-order by bf.distancia_con_vector asc;
+order by bf.distancia_con_vector asc
+limit 10;
 """)
 
   session = Session()
