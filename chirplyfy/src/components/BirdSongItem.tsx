@@ -19,7 +19,7 @@ const BirdSongItem = ({ birdSong }: { birdSong: BirdSong }) => {
         </IonLabel>
         <div>
           <audio controls autoPlay={false}>
-            <source src={birdSong.fileUrl}></source>
+            <source src={birdSong.fileurl}></source>
           </audio>
         </div>
       </div>

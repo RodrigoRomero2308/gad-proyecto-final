@@ -1,61 +1,45 @@
 export interface BirdSong {
   id: number;
-  fileUrl: string;
+  fileurl: string;
   common_name: string;
   scientific_name: string;
   distancia_con_vector: number;
 }
 
 export const useSearchForBirdSongs = () => {
-  const searchForBirdSongs = async (file: File) => {
+  const searchForBirdSongs = async (
+    file: File,
+    radius: number = 0.5
+  ): Promise<BirdSong[]> => {
     await new Promise((resolve) => {
       setTimeout(resolve, 2000);
     });
 
-    const result: BirdSong[] = [
-      {
-        id: 1,
-        fileUrl:
-          "https://xeno-canto.org/sounds/uploaded/BTOFEKXFGW/XC198453-T10.mp3",
-        common_name: "Ave 1",
-        distancia_con_vector: 0.3,
-        scientific_name: "sc1",
-      },
-      {
-        id: 2,
-        fileUrl:
-          "https://xeno-canto.org/sounds/uploaded/BTOFEKXFGW/XC198453-T10.mp3",
-        common_name: "Ave 2",
-        distancia_con_vector: 0.3,
-        scientific_name: "sc2",
-      },
-      {
-        id: 3,
-        fileUrl:
-          "https://xeno-canto.org/sounds/uploaded/BTOFEKXFGW/XC198453-T10.mp3",
-        common_name: "Ave 3",
-        distancia_con_vector: 0.3,
-        scientific_name: "sc3",
-      },
-      {
-        id: 4,
-        fileUrl:
-          "https://xeno-canto.org/sounds/uploaded/BTOFEKXFGW/XC198453-T10.mp3",
-        common_name: "Ave 4",
-        distancia_con_vector: 0.3,
-        scientific_name: "sc4",
-      },
-      {
-        id: 5,
-        fileUrl:
-          "https://xeno-canto.org/sounds/uploaded/BTOFEKXFGW/XC198453-T10.mp3",
-        common_name: "Ave 5",
-        distancia_con_vector: 0.3,
-        scientific_name: "sc5",
-      },
-    ];
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("radius", radius.toString());
 
-    return result;
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/search_for_songs`,
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    if (!response.ok) {
+      console.log();
+      throw new Error("Request could not be fullfilled");
+    }
+
+    const responseJson = await response.json();
+
+    for (const item of responseJson) {
+      if (item.distancia_con_vector)
+        item.distancia_con_vector = Number(item.distancia_con_vector);
+    }
+
+    return responseJson;
   };
 
   return {

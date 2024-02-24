@@ -1,7 +1,7 @@
 import { IonButton, IonIcon, IonText } from "@ionic/react";
 import { getCatchyUploadPhrase } from "../data/catchyPhrases";
 import styles from "./FileUploadInput.module.css";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cloudUploadOutline } from "ionicons/icons";
 
 const FileUploadInput = ({
@@ -9,8 +9,9 @@ const FileUploadInput = ({
 }: {
   onFileUpload: (file: File) => void;
 }) => {
-  const catchyPhrase = getCatchyUploadPhrase();
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const [catchyPhrase, setCatchyPhrase] = useState(getCatchyUploadPhrase());
 
   const onClick = () => {
     if (!inputRef.current) return;
@@ -18,6 +19,16 @@ const FileUploadInput = ({
     inputRef.current.value = "";
     inputRef.current.click();
   };
+
+  useEffect(() => {
+    const timeout = window.setInterval(() => {
+      setCatchyPhrase(getCatchyUploadPhrase());
+    }, 5000);
+
+    return () => {
+      window.clearInterval(timeout);
+    };
+  }, []);
 
   return (
     <>
