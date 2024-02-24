@@ -10,18 +10,21 @@ from models import BirdSong, Species
 load_dotenv()
 
 db_url = environ.get('DB_URL')
+github_songs_folder = environ.get("GITHUB_SONGS_FOLDER")
+
+print(github_songs_folder)
 
 engine = create_engine(db_url)
 
 Session = sessionmaker(bind=engine)
 
-def save_to_db(filepath: str, species_common_name: Union[str, None], species_scientific_name: Union[str, None]):
-  if not os.path.exists(filepath):
+def save_to_db(fullfilepath: str, urlFilePath: str, species_common_name: Union[str, None], species_scientific_name: Union[str, None]):
+  if not os.path.exists(fullfilepath):
     raise FileNotFoundError()
   
-  filename = os.path.basename(filepath)
+  fileurl = github_songs_folder + "/" + urlFilePath
 
-  file_embeddings = embed_audio(filepath)
+  file_embeddings = embed_audio(fullfilepath)
 
   # Buscamos la especie, si no existe la guardamos
 
@@ -45,7 +48,7 @@ def save_to_db(filepath: str, species_common_name: Union[str, None], species_sci
     print(species)
   # Guardamos en la base
 
-  new_bird_song = BirdSong(filename=filename, filepath=filepath, vector=file_embeddings, species_id=species.id)
+  new_bird_song = BirdSong(fileurl=fileurl, vector=file_embeddings, species_id=species.id)
 
   session.add(new_bird_song)
   session.commit()
@@ -66,7 +69,7 @@ def similarity_search(filepath: str, radius: int):
 
   # Buscamos en postgres llamando a la funcion necesaria
   sql = text(f"""
-select b."id", b.filename, b.filepath, s.common_name, s.scientific_name, bf.distancia_con_vector 
+select b."id", b.fileurl, s.common_name, s.scientific_name, bf.distancia_con_vector 
 from busquedafhqt(ARRAY[{array_string}], {radius}) bf
 inner join bird_song b on b."id" = bf."result_id"
 inner join species s on b.species_id = s."id"
@@ -84,8 +87,7 @@ limit 10;
   for row in result:
       final_answer.append({
         "id": row.id,
-        "filename": row.filename,
-        "filepath": row.filepath,
+        "fileurl": row.fileurl,
         "common_name": row.common_name,
         "scientific_name": row.scientific_name,
         "distancia_con_vector": row.distancia_con_vector,

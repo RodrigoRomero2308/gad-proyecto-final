@@ -19,11 +19,12 @@ for folder_name, subfolders, filenames in os.walk(folderpath):
   for subfolder in subfolders:
     for child_folder_name, child_subfolders, child_filenames in os.walk(os.path.join(folder_name, subfolder)):
       for filename in child_filenames:
-        full_file_path = os.path.join(folder_name, subfolder, filename)
-        mp3_file = eyed3.load(full_file_path)
+        fullfilePath = os.path.join(folder_name, subfolder, filename)
+        filePath = f"{subfolder}/{filename}"
+        mp3_file = eyed3.load(fullfilePath)
         tag = mp3_file.tag
         title_info = get_information_from_tag_title(tag.title)
-        save_to_db(full_file_path, title_info["normal_name"], title_info["scientific_name"])
+        save_to_db(fullfilePath, filePath, title_info["normal_name"], title_info["scientific_name"])
 
 
       

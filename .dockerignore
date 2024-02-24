@@ -1,0 +1,6 @@
+.venv
+chirplyfy
+songs
+sql
+.env.example
+*.md
