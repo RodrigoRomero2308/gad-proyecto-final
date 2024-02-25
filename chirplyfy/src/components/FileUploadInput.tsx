@@ -1,8 +1,27 @@
-import { IonButton, IonIcon, IonText } from "@ionic/react";
+import {
+  IonButton,
+  IonContent,
+  IonIcon,
+  IonLabel,
+  IonModal,
+  IonRange,
+  IonText,
+} from "@ionic/react";
 import { getCatchyUploadPhrase } from "../data/catchyPhrases";
 import styles from "./FileUploadInput.module.css";
 import { useEffect, useRef, useState } from "react";
-import { cloudUploadOutline } from "ionicons/icons";
+import { cloudUploadOutline, settingsOutline } from "ionicons/icons";
+
+const getInitialSearchRadius = () => {
+  const initialRadius = window.localStorage.getItem("search_radius");
+
+  if (!initialRadius || Number.isNaN(initialRadius)) {
+    window.localStorage.setItem("search_radius", "0.5");
+    return 0.5;
+  }
+
+  return Number(initialRadius);
+};
 
 const FileUploadInput = ({
   onFileUpload,
@@ -12,6 +31,15 @@ const FileUploadInput = ({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [catchyPhrase, setCatchyPhrase] = useState(getCatchyUploadPhrase());
+
+  const [searchRadius, setSearchRadius] = useState(getInitialSearchRadius());
+
+  const updateSearchRadius = (newValue: number) => {
+    setSearchRadius(newValue);
+    window.localStorage.setItem("search_radius", newValue.toString());
+  };
+
+  const modal = useRef<HTMLIonModalElement>(null);
 
   const onClick = () => {
     if (!inputRef.current) return;
@@ -56,6 +84,37 @@ const FileUploadInput = ({
           hidden
         />
       </div>
+      <IonButton id="open-modal" className="ion-margin" expand="block">
+        <IonIcon slot="start" icon={settingsOutline}></IonIcon>
+        <IonText>Cambiar radio de busqueda</IonText>
+      </IonButton>
+      <IonModal
+        ref={modal}
+        trigger="open-modal"
+        initialBreakpoint={0.25}
+        breakpoints={[0, 0.25]}
+      >
+        <IonContent className="ion-padding">
+          <IonLabel>Radius: {searchRadius}</IonLabel>
+          <IonRange
+            max={1}
+            step={0.05}
+            value={searchRadius}
+            aria-label="Range with ionChange"
+            onIonChange={({ detail }) =>
+              updateSearchRadius(detail.value as number)
+            }
+          ></IonRange>
+          <IonButton
+            onClick={() => {
+              modal.current?.setCurrentBreakpoint(0);
+            }}
+            expand="block"
+          >
+            Cerrar
+          </IonButton>
+        </IonContent>
+      </IonModal>
       <IonButton onClick={onClick} className="ion-margin" expand="block">
         <IonIcon slot="start" icon={cloudUploadOutline}></IonIcon>
         <IonText>Upload</IonText>

@@ -4,6 +4,16 @@ import { useIonLoading, useIonToast } from "@ionic/react";
 import { BirdSong, useSearchForBirdSongs } from "../services/bird_song";
 import BirdSongsList from "./BirdSongsList";
 
+const getSearchRadius = () => {
+  const searchRadius = window.localStorage.getItem("search_radius");
+
+  if (!searchRadius || Number.isNaN(searchRadius)) {
+    return 0.5;
+  }
+
+  return Number(searchRadius);
+};
+
 const SongSearchForm = () => {
   const [presentLoading, dismissLoading] = useIonLoading();
   const [presentToast] = useIonToast();
@@ -15,7 +25,7 @@ const SongSearchForm = () => {
     console.log("upload");
     presentLoading("Loading songs...");
     try {
-      const songs = await searchForBirdSongs(file);
+      const songs = await searchForBirdSongs(file, getSearchRadius());
 
       setResultsFromApi(songs);
     } catch (error) {
