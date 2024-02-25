@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Chirplyfy</string>
+    <string name="title_activity_main">Chirplyfy</string>
+    <string name="package_name">ar.com.rodrigoromero.chirplyfy</string>
+    <string name="custom_url_scheme">ar.com.rodrigoromero.chirplyfy</string>
+</resources>
