@@ -1,19 +1,33 @@
 from db import similarity_search
 
-folderpath = 'C:/Users/User/Documents/GAD/50-query-set/50'
-radius = 0.5
+folderpath = 'C:/Users/rodri/OneDrive/Documentos/Facultad/GAD/50-query-set/50-query-set'
+radius = 0.8 # Query is limited to 10 results anyways
 
 successes = [0, 0, 0, 0, 0]
 anysuccesses = 0
 
+audios_processed = 0
+
+def save_results(filename, results):
+    with open(f"results/{filename}.txt", 'w') as file:
+        for result in results:
+            fileurl = result["fileurl"]
+            distancia_con_vector = result["distancia_con_vector"]
+            file.write(f"{fileurl}. Distancia {distancia_con_vector}\n")
+
 for file in range(50):
-    full_file_path = folderpath + "/" + i + ".mp3"
-    result: list = similarity_search(full_file_path, radius)
+    print(f"Procesando {file + 1}.mp3")
+    full_file_path = folderpath + "/" + str(file + 1) + ".mp3"
+    result: list = similarity_search(full_file_path, radius, 5)
+    print(f"Encontrados {result.__len__()} resultados")
+    save_results(f"{file + 1}.mp3", result)
+    audios_processed = audios_processed + 1
+    print(f"Procesados {audios_processed} audios")
     for i in range(5):
-        if result[i].filename == file + "-" + i + ".mp3":
+        if str(file + 1) + "-" + str(i + 1) + ".mp3" in result[i]["fileurl"]:
             successes[i] = successes[i] + 1
-        if "" + file + "-" in result[i].filename:
-            anysuccesses[i] = anysuccesses[i] + 1
+        if str(file + 1) + "-" in result[i]["fileurl"]:
+            anysuccesses = anysuccesses + 1
   
 print(f"Total success rate: {str(sum(successes) / 250 * 100)}%")
 print(f"First five without order success rate: {str(anysuccesses / 250 * 100)}%")

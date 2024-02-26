@@ -22,6 +22,8 @@ def save_to_db(fullfilepath: str, urlFilePath: str, species_common_name: Union[s
   if not os.path.exists(fullfilepath):
     raise FileNotFoundError()
   
+  print(f"Uploading {fullfilepath}...")
+  
   fileurl = github_songs_folder + "/" + urlFilePath
 
   file_embeddings = embed_audio(fullfilepath)
@@ -59,7 +61,7 @@ def save_to_db(fullfilepath: str, urlFilePath: str, species_common_name: Union[s
   session.close()
   return
 
-def similarity_search(filepath: str, radius: int):
+def similarity_search(filepath: str, radius: int, max_results: int = 10):
   if not os.path.exists(filepath):
     raise FileNotFoundError()
 
@@ -75,7 +77,7 @@ inner join bird_song b on b."id" = bf."result_id"
 inner join species s on b.species_id = s."id"
 where bf.distancia_con_vector > 0
 order by bf.distancia_con_vector asc
-limit 10;
+limit {max_results};
 """)
 
   session = Session()
@@ -92,5 +94,7 @@ limit 10;
         "scientific_name": row.scientific_name,
         "distancia_con_vector": row.distancia_con_vector,
       })
+
+  session.close()
   
   return final_answer
