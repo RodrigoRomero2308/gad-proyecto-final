@@ -1,6 +1,6 @@
 from db import similarity_search
 
-folderpath = 'C:/Users/rodri/OneDrive/Documentos/Facultad/GAD/50-query-set/50-query-set'
+folderpath = 'C:/Users/rodri/OneDrive/Documentos/Facultad/GAD/50/50'
 radius = 0.8 # Query is limited to 10 results anyways
 
 successes5 = [0, 0, 0, 0, 0]
@@ -23,7 +23,7 @@ for file in range(50):
     audios_processed = audios_processed + 1
     print(f"Procesados {audios_processed} audios")
     for i in range(5):
-        if str(file + 1) + "-" + str(3) + ".mp3" in result[i]["fileurl"]:
+        if str(file + 1) + "-" + str(5) + ".mp3" in result[i]["fileurl"]:
             for j in range(i, 5):
                 successes5[j] = successes5[j] + 1
 

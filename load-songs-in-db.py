@@ -2,7 +2,7 @@ import os
 import eyed3
 from db import save_to_db
 
-folderpath = 'C:/Users/rodri/OneDrive/Documentos/Facultad/GAD/Code/songs/modificados2'
+folderpath = 'C:/Users/rodri/OneDrive/Documentos/Facultad/GAD/50-query-set/upload'
 
 # Asumiendo que la carpeta tiene la estructura enviada:
 # - Cada subcarpeta representa los audios de una especie
@@ -24,7 +24,7 @@ for folder_name, subfolders, filenames in os.walk(folderpath):
         mp3_file = eyed3.load(fullfilePath)
         tag = mp3_file.tag
         duration = mp3_file.info.time_secs
-        if duration < 1:
+        if duration < 0.4:
           print(f"Skipping {filename}. Duration: {duration}")
           continue
         print(duration)
