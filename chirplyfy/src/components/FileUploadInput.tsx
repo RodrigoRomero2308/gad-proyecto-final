@@ -9,8 +9,12 @@ import {
 } from "@ionic/react";
 import { getCatchyUploadPhrase } from "../data/catchyPhrases";
 import styles from "./FileUploadInput.module.css";
-import { useEffect, useRef, useState } from "react";
-import { cloudUploadOutline, settingsOutline } from "ionicons/icons";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  cloudUploadOutline,
+  searchOutline,
+  settingsOutline,
+} from "ionicons/icons";
 
 const getInitialSearchRadius = () => {
   const initialRadius = window.localStorage.getItem("search_radius");
@@ -29,6 +33,13 @@ const FileUploadInput = ({
   onFileUpload: (file: File) => void;
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const [audioUploaded, setAudioUploaded] = useState<File>();
+
+  const audioUrl = useMemo(
+    () => (audioUploaded ? URL.createObjectURL(audioUploaded) : undefined),
+    [audioUploaded]
+  );
 
   const [catchyPhrase, setCatchyPhrase] = useState(getCatchyUploadPhrase());
 
@@ -58,6 +69,39 @@ const FileUploadInput = ({
     };
   }, []);
 
+  let bottomComponent = (
+    <>
+      <IonButton onClick={onClick} className="ion-margin" expand="block">
+        <IonIcon slot="start" icon={cloudUploadOutline}></IonIcon>
+        <IonText>Upload</IonText>
+      </IonButton>
+    </>
+  );
+
+  if (audioUploaded)
+    bottomComponent = (
+      <>
+        <audio
+          style={{
+            display: "block",
+            width: "100%",
+          }}
+          controls
+          autoPlay={false}
+        >
+          <source src={audioUrl} />
+        </audio>
+        <IonButton
+          onClick={() => onFileUpload(audioUploaded)}
+          className="ion-margin"
+          expand="block"
+        >
+          <IonIcon slot="start" icon={searchOutline}></IonIcon>
+          <IonText>Search for birds</IonText>
+        </IonButton>
+      </>
+    );
+
   return (
     <>
       <div className={styles["file-upload-input"]} onClick={onClick}>
@@ -76,7 +120,8 @@ const FileUploadInput = ({
 
             if (!files) return console.error("No files found");
 
-            return onFileUpload(files[0]);
+            setAudioUploaded(files[0]);
+            // return onFileUpload(files[0]);
           }}
           ref={inputRef}
           type="file"
@@ -115,10 +160,7 @@ const FileUploadInput = ({
           </IonButton>
         </IonContent>
       </IonModal>
-      <IonButton onClick={onClick} className="ion-margin" expand="block">
-        <IonIcon slot="start" icon={cloudUploadOutline}></IonIcon>
-        <IonText>Upload</IonText>
-      </IonButton>
+      {bottomComponent}
     </>
   );
 };
