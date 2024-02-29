@@ -13,3 +13,8 @@ where bird_song_id in (
 
 delete from bird_song
 where fileurl like '%-4%' and fileurl not like '%X%';
+
+-- Change files URL
+
+UPDATE bird_song
+SET fileurl = REPLACE(fileurl, 'http://example.com/songs/', 'https://new-server.com/audio/');

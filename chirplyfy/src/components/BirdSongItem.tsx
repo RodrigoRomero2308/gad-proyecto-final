@@ -2,6 +2,7 @@ import { IonButton, IonImg, IonItem, IonLabel, IonLoading } from "@ionic/react";
 import { BirdSong, useBirdsServices } from "../services/bird_song";
 import styles from "./BirdSongItem.module.css";
 import { useEffect, useRef, useState } from "react";
+import AudioPlayer from "./AudioPlayer";
 
 const BirdSongItem = ({ birdSong }: { birdSong: BirdSong }) => {
   const { fetchBirdImages } = useBirdsServices();
@@ -81,15 +82,7 @@ const BirdSongItem = ({ birdSong }: { birdSong: BirdSong }) => {
               </h3>
             </IonLabel>
             <div className="ion-margin">
-              <audio
-                style={{
-                  minWidth: "100%",
-                }}
-                controls
-                autoPlay={false}
-              >
-                <source src={birdSong.fileurl}></source>
-              </audio>
+              <AudioPlayer url={birdSong.fileurl} id={birdSong.id.toString()} />
             </div>
             {birdImageUrl ? (
               <IonButton

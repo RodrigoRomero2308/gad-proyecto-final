@@ -4,7 +4,39 @@
   align-items: center;
   justify-content: center;
   padding: 20px;
+  width: 80vw;
+}
+
+.file-upload-input-text {
+  padding: 20px;
   border-radius: 5px;
   border: 1px solid var(--ion-text-color);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+@media (min-width: 576px) {
+  .file-upload-input {
+    width: 75vw;
+  }
+}
+
+/* Styles for desktops (min-width: 768px) */
+@media (min-width: 768px) {
+  .file-upload-input {
+    width: 70vw;
+  }
+}
+
+/* Styles for large desktops (min-width: 992px) */
+@media (min-width: 992px) {
+  .file-upload-input {
+    width: 60vw;
+  }
+}
+
+/* Styles for extra large desktops (min-width: 1200px) */
+@media (min-width: 1200px) {
+  .file-upload-input {
+    width: 50vw;
+  }
 }

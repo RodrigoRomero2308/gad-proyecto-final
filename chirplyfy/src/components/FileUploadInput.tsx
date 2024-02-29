@@ -15,6 +15,7 @@ import {
   searchOutline,
   settingsOutline,
 } from "ionicons/icons";
+import AudioPlayer from "./AudioPlayer";
 
 const getInitialSearchRadius = () => {
   const initialRadius = window.localStorage.getItem("search_radius");
@@ -78,19 +79,10 @@ const FileUploadInput = ({
     </>
   );
 
-  if (audioUploaded)
+  if (audioUploaded && audioUrl)
     bottomComponent = (
       <>
-        <audio
-          style={{
-            display: "block",
-            width: "100%",
-          }}
-          controls
-          autoPlay={false}
-        >
-          <source src={audioUrl} />
-        </audio>
+        <AudioPlayer url={audioUrl} id="input" />
         <IonButton
           onClick={() => onFileUpload(audioUploaded)}
           className="ion-margin"
@@ -99,13 +91,17 @@ const FileUploadInput = ({
           <IonIcon slot="start" icon={searchOutline}></IonIcon>
           <IonText>Search for birds</IonText>
         </IonButton>
+        <IonButton onClick={onClick} className="ion-margin" expand="block">
+          <IonIcon slot="start" icon={cloudUploadOutline}></IonIcon>
+          <IonText>Use another file</IonText>
+        </IonButton>
       </>
     );
 
   return (
     <>
       <div className={styles["file-upload-input"]} onClick={onClick}>
-        <div>
+        <div className={styles["file-upload-input-text"]}>
           <IonText style={{ display: "block" }} color="primary">
             <h1 style={{ marginTop: 0 }}>{catchyPhrase.main}</h1>
           </IonText>
@@ -131,7 +127,7 @@ const FileUploadInput = ({
       </div>
       <IonButton id="open-modal" className="ion-margin" expand="block">
         <IonIcon slot="start" icon={settingsOutline}></IonIcon>
-        <IonText>Cambiar radio de busqueda</IonText>
+        <IonText>Change search radius</IonText>
       </IonButton>
       <IonModal
         ref={modal}
@@ -141,6 +137,12 @@ const FileUploadInput = ({
       >
         <IonContent className="ion-padding">
           <IonLabel>Radius: {searchRadius}</IonLabel>
+          <IonLabel>
+            <p>
+              Wider search, diverse chirps: Increase the radius to see more, but
+              expect variety.
+            </p>
+          </IonLabel>
           <IonRange
             max={1}
             step={0.05}
@@ -156,7 +158,7 @@ const FileUploadInput = ({
             }}
             expand="block"
           >
-            Cerrar
+            Close
           </IonButton>
         </IonContent>
       </IonModal>
