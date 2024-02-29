@@ -1,0 +1,20 @@
+.bird-song-item::part(native) {
+  background: transparent;
+}
+
+.bird-song-item-content {
+  display: grid;
+  place-items: center;
+  min-width: 100%;
+}
+
+.bird-song-item-content > * {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.bird-song-item-content-image {
+  z-index: -1;
+  object-fit: cover;
+  display: block;
+}

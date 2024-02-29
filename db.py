@@ -12,8 +12,6 @@ load_dotenv()
 db_url = environ.get('DB_URL')
 github_songs_folder = environ.get("GITHUB_SONGS_FOLDER")
 
-print(github_songs_folder)
-
 engine = create_engine(db_url)
 
 Session = sessionmaker(bind=engine)

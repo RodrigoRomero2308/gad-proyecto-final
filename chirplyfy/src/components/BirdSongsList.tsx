@@ -16,9 +16,13 @@ const BirdSongsList = ({
         <IonIcon slot="start" icon={returnUpBackOutline} />
         <IonLabel>Reset</IonLabel>
       </IonButton>
-      <IonList>
+      <IonList
+        style={{
+          background: "transparent",
+        }}
+      >
         {birdSongs.map((item) => (
-          <BirdSongItem birdSong={item} />
+          <BirdSongItem key={item.id} birdSong={item} />
         ))}
       </IonList>
     </>

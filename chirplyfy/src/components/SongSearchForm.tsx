@@ -1,7 +1,7 @@
 import { useState } from "react";
 import FileUploadInput from "./FileUploadInput";
 import { useIonLoading, useIonToast } from "@ionic/react";
-import { BirdSong, useSearchForBirdSongs } from "../services/bird_song";
+import { BirdSong, useBirdsServices } from "../services/bird_song";
 import BirdSongsList from "./BirdSongsList";
 
 const getSearchRadius = () => {
@@ -17,7 +17,7 @@ const getSearchRadius = () => {
 const SongSearchForm = () => {
   const [presentLoading, dismissLoading] = useIonLoading();
   const [presentToast] = useIonToast();
-  const { searchForBirdSongs } = useSearchForBirdSongs();
+  const { searchForBirdSongs } = useBirdsServices();
 
   const [resultsFromApi, setResultsFromApi] = useState<BirdSong[]>();
 
